@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Willys">
+<title>INKOP.SYS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #080C10;
+    --surface: #0D1117;
+    --border: #1C2A38;
+    --border-bright: #1E3A50;
+    --ink: #C8D8E8;
+    --ink-2: #6A8A9A;
+    --ink-3: #304050;
+    --cyan: #00C8FF;
+    --cyan-dim: rgba(0,200,255,0.08);
+    --cyan-glow: rgba(0,200,255,0.15);
+    --green: #00FF88;
+    --green-dim: rgba(0,255,136,0.08);
+    --red: #FF3B5C;
+    --yellow: #FFD700;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .page {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 32px 16px 80px;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 28px;
+    border-left: 2px solid var(--cyan);
+    padding-left: 14px;
+  }
+
+  .header .sys {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--cyan);
+    letter-spacing: 0.15em;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  .header h1 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--cyan);
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 20px rgba(0,200,255,0.4);
+  }
+
+  .header .sub {
+    font-size: 11px;
+    color: var(--ink-2);
+    margin-top: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* Status bar */
+  .statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 16px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .status-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sync-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-2);
+    letter-spacing: 0.05em;
+  }
+
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ink-3);
+  }
+  .sync-dot.ok { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .sync-dot.err { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  .count-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+  .count-display strong { color: var(--cyan); }
+
+  /* Name row */
+  .name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .name-row label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-2);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .name-row input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--cyan);
+    width: 150px;
+    letter-spacing: 0.05em;
+  }
+  .name-row input:focus {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan-glow);
+  }
+  .name-row input::placeholder { color: var(--ink-3); }
+
+  /* Buttons */
+  .btns { display: flex; gap: 6px; }
+
+  button {
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    font-size: 11px;
+    border-radius: 4px;
+    padding: 7px 14px;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+    border: 1px solid;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border-bright);
+    color: var(--ink-2);
+  }
+  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .btn-primary {
+    background: var(--cyan-dim);
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan-glow);
+  }
+  .btn-primary:hover { background: rgba(0,200,255,0.15); }
+
+  .btn-primary.shop {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 0 12px rgba(0,255,136,0.2);
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--cyan) 0%, transparent 100%);
+    margin: 16px 0;
+    opacity: 0.3;
+  }
+
+  /* Category */
+  .category { margin-bottom: 20px; }
+
+  .cat-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    gap: 8px;
+  }
+
+  .cat-label-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cat-label-left::before {
+    content: '▶';
+    font-size: 7px;
+    color: var(--cyan);
+    opacity: 0.6;
+  }
+
+  .cat-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .cat-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+  }
+  .cat-count.has-items { color: var(--cyan); }
+
+  /* Items */
+  .items {
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    position: relative;
+  }
+
+  .item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: transparent;
+    transition: background 0.2s;
+  }
+
+  .item:last-child { border-bottom: none; }
+
+  .item.wanted::before { background: var(--cyan); }
+  .item.shop-done::before { background: var(--green); }
+
+  .check {
+    width: 16px; height: 16px; min-width: 16px;
+    border: 1px solid var(--border-bright);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 9px;
+    color: transparent;
+    background: transparent;
+    transition: all 0.15s;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .item.wanted .check {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: var(--cyan-dim);
+    box-shadow: 0 0 6px var(--cyan-glow);
+  }
+
+  .item.shop-done .check {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-dim);
+    box-shadow: 0 0 6px rgba(0,255,136,0.2);
+  }
+
+  .item-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    user-select: none;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .item.wanted .item-name { color: var(--ink); }
+
+  .item.shop-done .item-name {
+    color: var(--ink-2);
+    text-decoration: line-through;
+    text-decoration-color: var(--green);
+  }
+
+  .by {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    display: block;
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--ink-3);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    font-family: 'Share Tech Mono', monospace;
+    transition: color 0.15s;
+  }
+  .del-btn:hover { color: var(--red); }
+
+  /* Add row */
+  .add-wrap {
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    overflow: hidden;
+  }
+
+  .add-row {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(0,200,255,0.02);
+    border-top: 1px solid var(--border);
+  }
+
+  .add-row input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--cyan);
+    letter-spacing: 0.05em;
+  }
+  .add-row input::placeholder { color: var(--ink-3); }
+  .add-row input:focus { outline: none; }
+
+  .add-row button {
+    background: none;
+    border: 1px solid var(--border-bright);
+    color: var(--cyan);
+    font-size: 14px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .add-row button:hover {
+    border-color: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan-glow);
+  }
+
+  /* Empty */
+  .empty {
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 12px;
+    padding: 48px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  footer {
+    margin-top: 32px;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="sys">SYS // INKOP.EXE v2.0</div>
+    <h1>INKÖPSLISTAN</h1>
+    <div class="sub">WILLYS — DELAD DATABAS — REALTIDSSYNK</div>
+  </div>
+
+  <div class="statusbar">
+    <div class="status-left">
+      <div class="sync-indicator">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="syncLabel">ANSLUTER</span>
+      </div>
+      <div class="count-display" id="countLabel"></div>
+    </div>
+    <div class="btns">
+      <button class="btn-ghost" id="resetBtn">NY VECKA</button>
+      <button class="btn-primary" id="modeBtn">HANDLA</button>
+    </div>
+  </div>
+
+  <div class="name-row">
+    <label>OPERATÖR //</label>
+    <input type="text" id="nameInput" placeholder="DITT NAMN" maxlength="20">
+  </div>
+
+  <div class="divider"></div>
+
+  <div id="lists"></div>
+
+  <footer>// SYNKRONISERAD I REALTID // ALLA ÄNDRINGAR SPARAS DIREKT //</footer>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDN_Afs3-fXbCURm8VBC8ydUb8_qKEzfb4",
+  authDomain: "inkopslista-94013.firebaseapp.com",
+  databaseURL: "https://inkopslista-94013-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "inkopslista-94013",
+  storageBucket: "inkopslista-94013.firebasestorage.app",
+  messagingSenderId: "895498723280",
+  appId: "1:895498723280:web:40b840374dd07fb17d63d5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const itemsRef = ref(db, 'items');
+
+const CATEGORIES = [
+  { id: 'frukt',    name: 'Frukt & grönt',      items: ['Bananer','Äpplen','Tomater','Gurka','Sallad','Lök','Vitlök','Potatis','Citron','Paprika','Avokado','Morötter'] },
+  { id: 'brod',     name: 'Bröd & bageri',       items: ['Formbröd','Rågbröd','Frallor','Knäckebröd','Kanelbullar'] },
+  { id: 'mejeri',   name: 'Mejeri & ägg',        items: ['Mjölk','Yoghurt','Smör','Ägg','Ost','Grädde','Crème fraîche'] },
+  { id: 'kott',     name: 'Kött, fisk & chark',  items: ['Kycklingfilé','Köttfärs','Bacon','Skinka','Lax','Korv'] },
+  { id: 'skafferi', name: 'Skafferi',             items: ['Pasta','Ris','Havregryn','Krossade tomater','Matolja','Kryddor','Kaffe','Te','Socker','Mjöl'] },
+  { id: 'fryst',    name: 'Fryst',               items: ['Frysta grönsaker','Glass','Pizza','Fiskpinnar','Frysta bär'] },
+  { id: 'dryck',    name: 'Dryck',               items: ['Läsk','Juice','Vatten','Öl'] },
+  { id: 'snacks',   name: 'Snacks & godis',      items: ['Chips','Choklad','Godis','Nötter','Kex'] },
+  { id: 'hygien',   name: 'Hygien & städ',       items: ['Toalettpapper','Diskmedel','Tvättmedel','Tandkräm','Schampo','Hushållspapper'] },
+  { id: 'ovrigt',   name: 'Övrigt',              items: [] }
+];
+
+function slug(s){ return s.toLowerCase().replace(/[^a-zåäö0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
+function buildDefaults(){
+  const items = {};
+  CATEGORIES.forEach(cat => {
+    cat.items.forEach(name => {
+      const id = cat.id + '__' + slug(name);
+      items[id] = { id, catId: cat.id, name, wanted: false, done: false, custom: false, addedBy: null };
+    });
+  });
+  return items;
+}
+
+let state = { items: {}, mode: 'plan', myName: '' };
+let saving = false;
+
+state.myName = localStorage.getItem('willys-namn') || '';
+document.getElementById('nameInput').value = state.myName;
+
+function setSyncStatus(s){
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  dot.className = 'sync-dot ' + (s === 'ok' ? 'ok' : s === 'err' ? 'err' : '');
+  label.textContent = s === 'ok' ? 'ONLINE' : s === 'err' ? 'FEL' : 'ANSLUTER';
+}
+
+onValue(itemsRef, (snapshot) => {
+  if(saving) return;
+  const data = snapshot.val();
+  state.items = data || buildDefaults();
+  if(!data) set(itemsRef, state.items);
+  setSyncStatus('ok');
+  render();
+}, () => setSyncStatus('err'));
+
+async function saveItem(id, patch){
+  saving = true;
+  try { await update(ref(db, 'items/' + id), patch); setSyncStatus('ok'); }
+  catch(e){ setSyncStatus('err'); }
+  saving = false;
+}
+
+async function removeItem(id){
+  saving = true;
+  try { await set(ref(db, 'items/' + id), null); setSyncStatus('ok'); }
+  catch(e){ setSyncStatus('err'); }
+  saving = false;
+}
+
+function toggleWanted(id){
+  const it = state.items[id]; if(!it) return;
+  const wanted = !it.wanted;
+  state.items[id] = { ...it, wanted, done: wanted ? it.done : false };
+  render();
+  saveItem(id, { wanted, done: state.items[id].done });
+}
+
+function toggleDone(id){
+  const it = state.items[id]; if(!it) return;
+  const done = !it.done;
+  state.items[id] = { ...it, done };
+  render();
+  saveItem(id, { done });
+}
+
+function addCustomItem(catId, name){
+  name = name.trim(); if(!name) return;
+  const id = catId + '__custom-' + Date.now();
+  const item = { id, catId, name, wanted: true, done: false, custom: true, addedBy: state.myName || null };
+  state.items[id] = item;
+  render();
+  saveItem(id, item);
+}
+
+function deleteItem(id){
+  delete state.items[id];
+  render();
+  removeItem(id);
+}
+
+async function resetWeek(){
+  const updates = {};
+  Object.keys(state.items).forEach(id => {
+    state.items[id].wanted = false;
+    state.items[id].done = false;
+    updates['items/' + id + '/wanted'] = false;
+    updates['items/' + id + '/done'] = false;
+  });
+  render();
+  saving = true;
+  try { await update(ref(db), updates); setSyncStatus('ok'); }
+  catch(e){ setSyncStatus('err'); }
+  saving = false;
+}
+
+function render(){
+  const listsEl = document.getElementById('lists');
+  const countEl = document.getElementById('countLabel');
+
+  const all = Object.values(state.items);
+  const wanted = all.filter(i => i.wanted);
+  const done = wanted.filter(i => i.done).length;
+
+  if(state.mode === 'plan'){
+    const n = wanted.length;
+    countEl.innerHTML = n === 0 ? '' : '// <strong>' + n + '</strong> ' + (n === 1 ? 'VARA' : 'VAROR') + ' VALDA';
+  } else {
+    countEl.innerHTML = '// <strong>' + done + '</strong>/<strong>' + wanted.length + '</strong> HÄMTADE';
+  }
+
+  const modeBtn = document.getElementById('modeBtn');
+  if(state.mode === 'shop'){
+    modeBtn.textContent = 'PLANERA';
+    modeBtn.className = 'btn-primary shop';
+  } else {
+    modeBtn.textContent = 'HANDLA';
+    modeBtn.className = 'btn-primary';
+  }
+
+  listsEl.innerHTML = '';
+
+  if(state.mode === 'shop' && wanted.length === 0){
+    listsEl.innerHTML = '<div class="empty">// LISTAN ÄR TOM //<br>BOCKA VAROR I PLANERA-LÄGET</div>';
+    return;
+  }
+
+  CATEGORIES.forEach(cat => {
+    let catItems = all.filter(i => i.catId === cat.id);
+    if(state.mode === 'shop'){
+      catItems = catItems.filter(i => i.wanted);
+      if(catItems.length === 0) return;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'category';
+
+    const planCount = catItems.filter(i => i.wanted).length;
+    const doneCount = catItems.filter(i => i.done).length;
+    const countStr = state.mode === 'shop'
+      ? doneCount + '/' + planCount
+      : planCount > 0 ? planCount + ' VALDA' : '';
+
+    const label = document.createElement('div');
+    label.className = 'cat-label';
+    label.innerHTML =
+      '<div class="cat-label-left"><span class="cat-name">' + cat.name.toUpperCase() + '</span></div>' +
+      (countStr ? '<span class="cat-count' + (planCount > 0 ? ' has-items' : '') + '">' + countStr + '</span>' : '');
+    wrap.appendChild(label);
+
+    const ul = document.createElement('ul');
+    ul.className = 'items';
+
+    catItems.forEach(it => {
+      const isShop = state.mode === 'shop';
+      const li = document.createElement('li');
+      const cls = isShop ? (it.done ? 'shop-done' : '') : (it.wanted ? 'wanted' : '');
+      li.className = 'item ' + cls;
+
+      const check = document.createElement('div');
+      check.className = 'check';
+      check.textContent = (isShop ? it.done : it.wanted) ? '✓' : '';
+      check.addEventListener('click', () => isShop ? toggleDone(it.id) : toggleWanted(it.id));
+
+      const nameWrap = document.createElement('span');
+      nameWrap.className = 'item-name';
+      nameWrap.addEventListener('click', () => isShop ? toggleDone(it.id) : toggleWanted(it.id));
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = it.name;
+      nameWrap.appendChild(nameSpan);
+
+      if(it.custom && it.addedBy){
+        const by = document.createElement('span');
+        by.className = 'by';
+        by.textContent = '// ' + it.addedBy.toUpperCase();
+        nameWrap.appendChild(by);
+      }
+
+      li.appendChild(check);
+      li.appendChild(nameWrap);
+
+      if(it.custom && !isShop){
+        const del = document.createElement('button');
+        del.className = 'del-btn';
+        del.textContent = '×';
+        del.addEventListener('click', () => deleteItem(it.id));
+        li.appendChild(del);
+      }
+
+      ul.appendChild(li);
+    });
+
+    wrap.appendChild(ul);
+
+    if(state.mode === 'plan'){
+      const addWrap = document.createElement('div');
+      addWrap.className = 'add-wrap';
+      const addRow = document.createElement('div');
+      addRow.className = 'add-row';
+      const inp = document.createElement('input');
+      inp.placeholder = '// LÄGG TILL VARA';
+      const addBtn = document.createElement('button');
+      addBtn.textContent = '+';
+      const doAdd = () => { addCustomItem(cat.id, inp.value); inp.value = ''; };
+      addBtn.addEventListener('click', doAdd);
+      inp.addEventListener('keydown', e => { if(e.key === 'Enter') doAdd(); });
+      addRow.appendChild(inp);
+      addRow.appendChild(addBtn);
+      addWrap.appendChild(addRow);
+      wrap.appendChild(addWrap);
+    }
+
+    listsEl.appendChild(wrap);
+  });
+}
+
+document.getElementById('modeBtn').addEventListener('click', () => {
+  state.mode = state.mode === 'shop' ? 'plan' : 'shop';
+  render();
+});
+
+document.getElementById('resetBtn').addEventListener('click', resetWeek);
+
+document.getElementById('nameInput').addEventListener('change', e => {
+  state.myName = e.target.value.trim();
+  localStorage.setItem('willys-namn', state.myName);
+});
+</script>
+</body>
+</html>
